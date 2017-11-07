@@ -140,12 +140,18 @@ class Database {
         // productName is the name of the product that we want to buy
         // Think if you may need to implement two queries chained
         // remeber once it's finish to comment callback('Error buying product');
-        let productID = database.collection(products).find({"name":productName},{"_id":1, "name":0, "description":0, "category":0, "price":0}, callback);
-        database.collection(users).update(
-          { "firstName": userFirstName},
-          { $push:
-            { "shoppingCart": productID }
-          }, callback);
+        database.collection(products).findOne(
+          {"name":productName}, (err, doc) => {
+            if(err) {
+              console.log(err);
+            }
+            database.collection(users).update(
+              { "firstName": userFirstName},
+              { $push:
+                { "shoppingCart": doc._id }
+              }, callback);
+          }
+        );
         // callback('Error buying product');
       }
     });
@@ -154,7 +160,7 @@ class Database {
   addReviewToProduct( {productName, review}, callback = (messageResult) => {}){
     this.connect((error, database) => {
       if (error) {
-        callback(error)
+        callback(error);
       } else {
         // LAB 8
         // Implement the query to review a product
